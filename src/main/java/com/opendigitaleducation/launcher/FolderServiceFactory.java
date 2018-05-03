@@ -85,11 +85,15 @@ public class FolderServiceFactory extends ServiceVerticleFactory {
                         String [] item = line.split(":");
                         if (item.length == 3) {
                             id = item[2];
-                            deploymentOptions.setExtraClasspath(Collections.singletonList(servicePath));
+                            String servicePathCP = servicePath;
+                            if ("\\".equals(File.separator)) {
+                                servicePathCP = servicePathCP.replaceAll("\\\\", "/");
+                            }
+                            deploymentOptions.setExtraClasspath(Collections.singletonList(servicePathCP));
                             deploymentOptions.setIsolationGroup("__vertx_folder_" + artifact[1]);
                             try {
                                 URLClassLoader urlClassLoader = new URLClassLoader(
-                                    new URL[]{new URL("file://" + servicePath )}, classLoader);
+                                    new URL[]{new URL("file://" + servicePathCP )}, classLoader);
                                 FolderServiceFactory.super.resolve(id, deploymentOptions, urlClassLoader, resolution);
                             } catch (MalformedURLException e) {
                                 resolution.fail(e);
