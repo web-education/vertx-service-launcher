@@ -10,6 +10,8 @@ import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.net.ProxyOptions;
+import io.vertx.core.net.ProxyType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -143,6 +145,14 @@ public class MavenServiceResolver extends AbstactServiceResolver {
             .setDefaultPort((uri.getPort() > 0 ? uri.getPort() : (ssl ? 443 : 80)))
             .setSsl(ssl)
             .setKeepAlive(false);
+        if (System.getProperty("httpclient.proxyHost") != null) {
+            ProxyOptions proxyOptions = new ProxyOptions()
+                .setHost(System.getProperty("httpclient.proxyHost"))
+                .setPort(Integer.parseInt(System.getProperty("httpclient.proxyPort")))
+                .setUsername(System.getProperty("httpclient.proxyUsername"))
+                .setPassword(System.getProperty("httpclient.proxyPassword"));
+            options.setProxyOptions(proxyOptions);
+        }
         final HttpClient client = vertx.createHttpClient(options);
         clients.add(client);
         return client;
