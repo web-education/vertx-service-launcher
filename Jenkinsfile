@@ -16,7 +16,7 @@ pipeline {
           *SNAPSHOT) export nexusRepository='snapshots' ;;
           *)         export nexusRepository='releases' ;;
           esac
-            mvn deploy:deploy-file -DgroupId=com.opendigitaleducation -DartifactId=vertx-service-launcher -Dversion=$jarVersion -Dpackaging=jar -Dclassifier=fat -Dfile=$jarFile -DrepositoryId=ode-$nexusRepository -Durl=http://maven.web-education.net/nexus/content/repositories/$nexusRepository/
+            mvn deploy:deploy-file -DgroupId=com.opendigitaleducation -DartifactId=vertx-service-launcher -Dversion=$jarVersion -Dpackaging=jar -Dclassifier=fat -Dfile=$jarFile -DrepositoryId=ode-$nexusRepository -Durl=https://maven.opendigitaleducation.com/nexus/content/repositories/$nexusRepository/
         '''
       }
     }
