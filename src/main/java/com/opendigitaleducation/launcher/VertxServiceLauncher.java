@@ -1,5 +1,7 @@
 package com.opendigitaleducation.launcher;
 
+import com.opendigitaleducation.launcher.deployer.CustomDeployer;
+import com.opendigitaleducation.launcher.deployer.CustomDeployerManager;
 import com.opendigitaleducation.launcher.utils.FileUtils;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
@@ -21,6 +23,7 @@ public class VertxServiceLauncher extends AbstractVerticle {
     private boolean cluster;
     private LocalMap<String, String> versionMap;
     private LocalMap<String, String> deploymentsIdMap;
+    private CustomDeployer customDeployer ;
 
     @Override
     public void start() throws Exception {
@@ -37,7 +40,8 @@ public class VertxServiceLauncher extends AbstractVerticle {
         serverMap.put("node", node);
         deploymentsIdMap = vertx.sharedData().getLocalMap("deploymentsId");
         versionMap = vertx.sharedData().getLocalMap("versions");
-
+        final String servicesPath = FileUtils.absolutePath(System.getProperty("vertx.services.path"));
+        customDeployer = new CustomDeployerManager(vertx,servicesPath,config().getString("assets-path"));
         deployServices(services);
     }
 
@@ -52,6 +56,30 @@ public class VertxServiceLauncher extends AbstractVerticle {
         if (name == null || name.isEmpty()) {
 			deployServices(services, index + 1);
 		}
+        //custom deployer
+        if(customDeployer.canDeploy(service)){
+            if (service.getBoolean("waitDeploy", false)){
+                customDeployer.deploy(service, res->{
+                    if(res.succeeded()){
+                        log.info("[CustomDeployer] Deployed succeed :"+name);
+                        deployServices(services, index + 1);
+                    }else{
+                        log.error("[CustomDeployer] Error deploying :"+name, res.cause());
+                    }
+                });
+            }else{
+                customDeployer.deploy(service, res->{
+                    if(res.succeeded()){
+                        log.info("[CustomDeployer] Deployed succeed :"+name);
+                    }else{
+                        log.error("[CustomDeployer] Error deploying :"+name, res.cause());
+                    }
+                });
+                deployServices(services, index + 1);
+            }
+            return;
+        }
+        //
         JsonObject config = service.getJsonObject("config");
         if (config == null) {
             config = new JsonObject();
