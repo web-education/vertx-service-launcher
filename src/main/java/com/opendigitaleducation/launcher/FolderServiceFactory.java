@@ -59,7 +59,7 @@ public class FolderServiceFactory extends ServiceVerticleFactory {
             } else {
                 serviceResolver.resolve(identifier, jar -> {
                     if (jar.succeeded()) {
-                        unzipJar(jar.result(), servicePath, res -> {
+                        unzipJar(vertx, jar.result(), servicePath, res -> {
                             if (res.succeeded()) {
                                 deploy(identifier, deploymentOptions, classLoader, resolution, artifact, servicePath);
                             } else {
@@ -116,8 +116,8 @@ public class FolderServiceFactory extends ServiceVerticleFactory {
             serviceResolver.close();
         }
     }
-
-    private void unzipJar(String jarFile, String destDir, Handler<AsyncResult<Void>> handler) {
+    //TODO move to utils
+    public static void unzipJar(Vertx vertx, String jarFile, String destDir, Handler<AsyncResult<Void>> handler) {
         vertx.executeBlocking(future -> {
             long start = System.currentTimeMillis();
             JarFile jar = null;
@@ -145,7 +145,9 @@ public class FolderServiceFactory extends ServiceVerticleFactory {
                             fos.write(buffer, 0, bytesRead);
                         }
                     } catch (IOException e) {
-                        future.fail(e);
+                        if (!future.isComplete()) {
+                            future.fail(e);
+                        }
                     } finally {
                         if (fos != null) {
                             fos.close();
@@ -156,7 +158,10 @@ public class FolderServiceFactory extends ServiceVerticleFactory {
                     }
                 }
             } catch (IOException e) {
-                future.fail(e);
+                if (!future.isComplete()) {
+                    future.fail(e);
+                    log.error("Error while unzip jar.", e);
+                }
             } finally {
                 if (jar != null) {
                     try {
