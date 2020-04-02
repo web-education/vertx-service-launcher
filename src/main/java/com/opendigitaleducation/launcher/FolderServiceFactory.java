@@ -13,6 +13,10 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collections;
 import java.util.Scanner;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 public class FolderServiceFactory extends ServiceVerticleFactory {
 
@@ -22,6 +26,8 @@ public class FolderServiceFactory extends ServiceVerticleFactory {
     private Vertx vertx;
     private String servicesPath;
     private ServiceResolverFactory serviceResolver;
+
+    private Map<String, Integer> verticle_counter = new HashMap<String,Integer>();
 
     @Override
     public void init(Vertx vertx) {
@@ -79,7 +85,14 @@ public class FolderServiceFactory extends ServiceVerticleFactory {
                         if (item.length == 3) {
                             id = item[2];
                             deploymentOptions.setExtraClasspath(Collections.singletonList(servicePath));
-                            deploymentOptions.setIsolationGroup("__vertx_folder_" + artifact[1]);
+
+                            String verticle_isolate_name = artifact[1] + "_" + artifact[2];
+                            Integer counter = verticle_counter.get(verticle_isolate_name);
+                            if(counter == null)
+                                counter = new Integer(0);
+                            verticle_counter.put(verticle_isolate_name, new Integer(counter.intValue() + 1));
+
+                            deploymentOptions.setIsolationGroup("__vertx_folder_" + verticle_isolate_name + "_" + counter.toString());
                             try {
                                 URLClassLoader urlClassLoader = new URLClassLoader(
                                     new URL[]{new URL("file://" + servicePath )}, classLoader);
