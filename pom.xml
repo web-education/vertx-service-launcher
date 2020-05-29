@@ -20,7 +20,7 @@
 
     <groupId>com.opendigitaleducation</groupId>
     <artifactId>vertx-service-launcher</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1-videoevents-SNAPSHOT</version>
 
     <properties>
         <java.version>1.8</java.version>
@@ -101,7 +101,7 @@
                   <id>default</id>
                   <goals>
                     <goal>build</goal>
-                    <goal>push</goal>
+                    <!-- goal>push</goal -->
                   </goals>
                 </execution>
               </executions>
