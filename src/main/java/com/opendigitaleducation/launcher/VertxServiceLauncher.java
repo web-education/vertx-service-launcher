@@ -68,7 +68,7 @@ public class VertxServiceLauncher extends AbstractVerticle {
         final DeploymentOptions deploymentOptions = new DeploymentOptions()
             .setConfig(config)
             .setWorker(service.getBoolean("worker", false))
-            .setInstances(config. Getinteger("instances", 1))
+            .setInstances(config.getInteger("instances", 1))
             .setMultiThreaded(service.getBoolean("multi-threaded", false));
         if (service.getBoolean("waitDeploy", false)) {
             vertx.deployVerticle(FACTORY_PREFIX + ":" + name, deploymentOptions, ar -> {
