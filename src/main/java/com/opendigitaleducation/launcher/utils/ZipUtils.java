@@ -18,6 +18,7 @@ import org.apache.commons.compress.utils.IOUtils;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
@@ -36,7 +37,7 @@ public class ZipUtils {
 
     public static void ungzip(Vertx vertx, String input, String output, Boolean gzip,
             Handler<AsyncResult<Void>> handler) {
-        vertx.executeBlocking(future -> {
+        vertx.executeBlocking(promise -> {
             final long start = System.currentTimeMillis();
             TarArchiveInputStream tar = null;
             try {
@@ -58,8 +59,8 @@ public class ZipUtils {
                         IOUtils.copy(tar, fos);
                     } catch (Exception e) {
                         log.error("Error while unzip tar.gz entry : " + entry.getName() + " -> " + input, e);
-                        if (!future.isComplete()) {
-                            future.fail(e);
+                        if (!promise.future().isComplete()) {
+                            promise.fail(e);
                         }
                     } finally {
                         if (fos != null) {
@@ -68,8 +69,8 @@ public class ZipUtils {
                     }
                 }
             } catch (IOException e) {
-                if (!future.isComplete()) {
-                    future.fail(e);
+                if (!promise.future().isComplete()) {
+                    promise.fail(e);
                     log.error("Error while unzip tar.gz : " + input, e);
                 }
             } finally {
@@ -82,14 +83,14 @@ public class ZipUtils {
                 }
             }
             log.info(input + " - uncompress duration : " + (System.currentTimeMillis() - start));
-            if (!future.isComplete()) {
-                future.complete();
+            if (!promise.future().isComplete()) {
+                promise.complete();
             }
         }, handler);
     }
 
     public static void unzipJar(Vertx vertx, String jarFile, String destDir, Handler<AsyncResult<Void>> handler) {
-        vertx.executeBlocking(future -> {
+        vertx.executeBlocking(promise -> {
             final long start = System.currentTimeMillis();
             JarFile jar = null;
             try {
@@ -113,8 +114,8 @@ public class ZipUtils {
                         IOUtils.copy(is, fos);
                     } catch (Exception e) {
                         log.error("Error while unzip jar entry : " + file.getName() + " -> " + jarFile, e);
-                        if (!future.isComplete()) {
-                            future.fail(e);
+                        if (!promise.future().isComplete()) {
+                            promise.fail(e);
                         }
                     } finally {
                         if (fos != null) {
@@ -126,8 +127,8 @@ public class ZipUtils {
                     }
                 }
             } catch (IOException e) {
-                if (!future.isComplete()) {
-                    future.fail(e);
+                if (!promise.future().isComplete()) {
+                    promise.fail(e);
                     log.error("Error while unzip jar.", e);
                 }
             } finally {
@@ -140,8 +141,8 @@ public class ZipUtils {
                 }
             }
             log.info(jarFile + " - uncompress duration : " + (System.currentTimeMillis() - start));
-            if (!future.isComplete()) {
-                future.complete();
+            if (!promise.future().isComplete()) {
+                promise.complete();
             }
         }, handler);
     }

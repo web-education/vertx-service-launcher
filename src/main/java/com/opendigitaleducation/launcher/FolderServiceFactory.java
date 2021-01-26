@@ -32,7 +32,7 @@ public class FolderServiceFactory extends ServiceVerticleFactory {
     }
 
     @Override
-    public void resolve(String id, DeploymentOptions deploymentOptions, ClassLoader classLoader, Future<String> resolution) {
+    public void resolve(String id, DeploymentOptions deploymentOptions, ClassLoader classLoader, Promise<String> resolution) {
         if (id == null || !id.startsWith(prefix())) {
             resolution.fail("Invalid identifier : " + id);
             return;
@@ -67,7 +67,7 @@ public class FolderServiceFactory extends ServiceVerticleFactory {
 		});
     }
 
-    private void deploy(String identifier, DeploymentOptions deploymentOptions, ClassLoader classLoader, Future<String> resolution, String[] artifact, String servicePath) {
+    private void deploy(String identifier, DeploymentOptions deploymentOptions, ClassLoader classLoader, Promise<String> resolution, String[] artifact, String servicePath) {
         vertx.fileSystem().readFile(servicePath + "META-INF" + File.separator + "MANIFEST.MF", ar -> {
 			if (ar.succeeded()) {
                 Scanner s = new Scanner(ar.result().toString());
@@ -94,7 +94,7 @@ public class FolderServiceFactory extends ServiceVerticleFactory {
                     }
                 }
                 s.close();
-                if (id == null && !resolution.isComplete()) {
+                if (id == null && !resolution.future().isComplete()) {
                     resolution.fail("Service not found (MANIFEST): " + identifier);
                 }
             } else {
